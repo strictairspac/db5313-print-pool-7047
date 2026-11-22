@@ -1,5 +1,5 @@
-from sqlalchemy import (JSON, Column, ForeignKey, Integer, MetaData, String,
-                        Table, Text)
+from sqlalchemy import (JSON, Boolean, Column, ForeignKey, Integer, MetaData,
+                        String, Table, Text)
 
 schema = MetaData()
 users = Table('accounts', schema,
@@ -38,3 +38,11 @@ audit = Table('audit_events', schema,
     Column('action', String(32), nullable=False),
     Column('reference', String(50), nullable=False),
     Column('created_at', String(32), nullable=False))
+maintenance = Table('maintenance_state', schema,
+    Column('id', Integer, primary_key=True),
+    Column('stopped', Boolean, nullable=False),
+    Column('epoch', String(36), nullable=False),
+    Column('stopped_by', String(40)),
+    Column('stopped_at', String(32)),
+    Column('resumed_by', String(40)),
+    Column('resumed_at', String(32)))

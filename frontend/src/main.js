@@ -5,7 +5,7 @@ import {topic} from './constants/project.js';
 import {loginPage} from './pages/login.js';
 import {casesPage} from './pages/cases.js';
 import {bindEditor, editorPage} from './pages/editor.js';
-import {runsPage} from './pages/runs.js';
+import {bindRuns, runsPage} from './pages/runs.js';
 import {bindEvidence, evidencePage} from './pages/evidence.js';
 import {go, route} from './router/hash.js';
 import {submit} from './hooks/submit.js';
@@ -37,9 +37,9 @@ async function refresh() {
   const {key: page,id} = route();
   if (!pages[page]) { go('cases'); return; }
   try {
-    const result = await Promise.all([state.spec || api('/spec'),api('/cases'),api('/runs'),api('/evidence'),api('/audit')]);
+    const result = await Promise.all([state.spec || api('/spec'),api('/cases'),api('/runs'),api('/evidence'),api('/audit'),api('/maintenance')]);
     if (revision !== key) return;
-    [state.spec,state.cases,state.runs,state.evidence,state.audit]=result;
+    [state.spec,state.cases,state.runs,state.evidence,state.audit,state.maintenance]=result;
   } catch (error) {
     if (revision !== key) return;
     if (!document.getElementById('message')) app.innerHTML='<main><div id="message" role="alert"></div><button id="retry">重试</button></main>';
@@ -56,6 +56,7 @@ async function refresh() {
   if (page==='evidence') bindEvidence(api, refresh, fail);
   if (page==='runs') {
     document.getElementById('refresh').addEventListener('click', refresh);
+    bindRuns(state, api, refresh, fail);
     if (state.runs.some(row=>['queued','running'].includes(row.status))) timer=setTimeout(refresh,1000);
   }
 }

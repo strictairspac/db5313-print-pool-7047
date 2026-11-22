@@ -4,7 +4,7 @@ from sqlalchemy import text
 from src.config.settings import cache, engine
 from src.controllers.workflow import download
 from src.models.tables import audit, cases, evidence, runs
-from src.schemas.workflow import CaseForm, LoginForm, ReviewForm
+from src.schemas.workflow import CaseForm, LoginForm, ResumeForm, ReviewForm
 from src.services import domain, workflow
 from src.services.security import current_user, login, operator, reviewer
 
@@ -67,3 +67,18 @@ def review_evidence(identity: int, form: ReviewForm, actor=Depends(reviewer)):
 @router.get('/audit')
 def list_audit(_=Depends(current_user)):
     return workflow.recent(audit)
+
+
+@router.get('/maintenance')
+def get_maintenance(_=Depends(current_user)):
+    return workflow.maintenance_status()
+
+
+@router.post('/maintenance/stop')
+def stop_claiming(actor=Depends(reviewer)):
+    return workflow.maintenance_stop(actor)
+
+
+@router.post('/maintenance/resume')
+def resume_claiming(form: ResumeForm, actor=Depends(reviewer)):
+    return workflow.maintenance_resume(form.epoch, actor)
